@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mermaid to SVG Toggle</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+        window.onload = async () => {
+            mermaid.initialize({ startOnLoad: false });
+
+            let mermaidCode = `graph TD;
+                A[開始] --> B[處理];
+                B --> C[結束];`;
+
+            window.toggleView = async () => {
+                const container = document.getElementById('container');
+
+                if (container.classList.contains('show-svg')) {
+                    // Show editor
+                    container.innerHTML = `<textarea id="editor">${mermaidCode}</textarea>`;
+                    container.classList.remove('show-svg');
+                } else {
+                    // Show SVG
+                    const editor = document.getElementById('editor');
+                    if (editor) {
+                        mermaidCode = editor.value; // Update the saved mermaid code
+                    }
+                    try {
+                        const { svg } = await mermaid.render('graphDiv', mermaidCode);
+                        container.innerHTML = svg;
+                        container.classList.add('show-svg');
+                    } catch (error) {
+                        container.innerHTML = `<p style="color: red;">錯誤: ${error.message}</p>`;
+                        container.classList.remove('show-svg'); // Ensure we can switch back to editor
+                        // Re-insert the editor with the original code
+                        container.innerHTML = `<textarea id="editor">${mermaidCode}</textarea>`;
+                    }
+                }
+            };
+
+            // Initial display of editor
+            container.innerHTML = `<textarea id="editor">${mermaidCode}</textarea>`;
+        };
+    </script>
+    <style>
+        #container {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .show-svg {
+            white-space: nowrap;
+        }
+        textarea {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        #syntax-guide {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+        #syntax-guide h2 {
+            margin-top: 0;
+        }
+        #syntax-guide pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <br>
+    <button onclick="toggleView()">切換檢視</button>
+
+    <div id="syntax-guide">
+        <h2>Mermaid 常見語法介紹</h2>
+        <p>以下是 Mermaid 的一些常見語法示例：</p>
+        
+        <h3>流程圖 (Flowchart)</h3>
+        <pre>
+graph TD;
+    A[開始] --> B[處理];
+    B --> C[結束];
+        </pre>
+        
+        <h3>順序圖 (Sequence Diagram)</h3>
+        <pre>
+sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice->>John: Hello John, how are you?
+    loop Healthcheck
+        John->>John: Fight against hypochondria
+    end
+    Note right of John: Rational thoughts prevail!
+    John-->>Alice: Great!
+    John->>Bob: How about you?
+    Bob-->>John: Jolly good!
+        </pre>
+        
+        <h3>甘特圖 (Gantt Diagram)</h3>
+        <pre>
+gantt
+    dateFormat  YYYY-MM-DD
+    title Adding GANTT diagram to mermaid
+    section A section
+    Completed task            :done,    des1, 2014-01-06,2014-01-08
+    Active task               :active,  des2, 2014-01-09, 3d
+    Future task               :         des3, after des2, 5d
+    Future task2              :         des4, after des3, 5d
+        </pre>
+        
+        <h3>類圖 (Class Diagram)</h3>
+        <pre>
+classDiagram
+    Class01 <|-- AveryLongClass : Cool label
+    Class03 *-- Class04
+    Class05 o-- Class06
+    Class07 .. Class08
+    Class09 --> C2 : Where am i?
+    Class09 --* C3
+    Class09 --|> Class07
+    Class07 : equals()
+    Class07 : Object[] elementData
+    Class01 : size()
+    Class01 : int chimp
+    Class01 : int gorilla
+    Class08 <--> C2: Cool label
+        </pre>
+        
+        <h3>狀態圖 (State Diagram)</h3>
+        <pre>
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
+        </pre>
+        
+        <h3>實體關係圖 (Entity Relationship Diagram)</h3>
+        <pre>
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ ORDER_ITEM : includes
+    CUSTOMER {
+        string name
+        string custNumber
+        string sector
+    }
+    ORDER {
+        int orderNumber
+        string deliveryDate
+    }
+    ORDER_ITEM {
+        string productName
+        int quantity
+        float pricePerUnit
+    }
+        </pre>
+    </div>
+</body>
+</html>
